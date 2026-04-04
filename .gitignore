@@ -1,0 +1,8 @@
+node_modules
+dist
+.env.local
+.env
+PROJECT_CONTEXT.txt
+AI_CONTEXT_FOR_BRAINSTORM.md
+.vscode/
+*.log
