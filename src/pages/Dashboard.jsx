@@ -2,18 +2,24 @@ import React, { useState } from 'react'
 import Sidebar from '../components/Sidebar'
 import CommandCenter from '../modules/CommandCenter'
 import NicheFinder from '../modules/NicheFinder'
+import Competitors from '../modules/Competitors'
 import Persona from '../modules/Storytelling'
 import BioGenerator from '../modules/BioGenerator'
-import ContentIdeas from '../modules/ContentFactory'
+import Offers from '../modules/Offers'
+import ContentGenerator from '../modules/ContentFactory'
 import ContentPlanner from '../modules/ContentPlanner'
+import Projects from '../modules/Projects'
 
 const MODULE_MAP = {
-  command:  null,
-  niche:    NicheFinder,
-  persona:  Persona,
-  bio:      BioGenerator,
-  ideas:    ContentIdeas,
-  planner:  ContentPlanner,
+  command:     null,
+  niche:       NicheFinder,
+  competitors: Competitors,
+  persona:     Persona,
+  bio:         BioGenerator,
+  offers:      Offers,
+  ideas:       ContentGenerator,
+  planner:     ContentPlanner,
+  projects:    Projects,
 }
 
 export default function Dashboard() {

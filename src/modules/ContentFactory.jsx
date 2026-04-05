@@ -5,7 +5,7 @@ import { generateAndRedirect } from '../utils/generateAndRedirect'
 import {
   ModuleLayout, FormCard, Field, SelectField, TextareaField, GenerateButton, InfoBanner
 } from '../components/ui/ModuleUI'
-import { PlusCircle, Loader2, CheckCircle, Clapperboard, Lightbulb } from 'lucide-react'
+import { PlusCircle, Loader2, CheckCircle, Clapperboard, Lightbulb, RotateCcw } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const PLATFORM_OPTIONS = [
@@ -15,10 +15,10 @@ const PLATFORM_OPTIONS = [
   { value: 'YouTube Shorts', label: 'YouTube Shorts' },
 ]
 
-export default function ContentIdeas() {
+export default function ContentGenerator() {
   const { user, profile } = useAuth()
 
-  // Tabs: 'ideas' | 'script'
+  // Tabs: 'ideas' | 'script' | 'angle'
   const [activeTab, setActiveTab] = useState('ideas')
 
   // ── Ideas tab state ──
@@ -33,6 +33,10 @@ export default function ContentIdeas() {
   const [scriptJudul, setScriptJudul] = useState('')
   const [scriptPlatform, setScriptPlatform] = useState('IG Reels')
   const [generatedScript, setGeneratedScript] = useState(false)
+
+  // ── Angle Twisting tab state ──
+  const [angleTopic, setAngleTopic] = useState('')
+  const [generatedAngle, setGeneratedAngle] = useState(false)
 
   // Pillars from profile
   const savedPillars = profile?.final_pillars?.length > 0
@@ -120,6 +124,50 @@ Pastikan semua konten relevan untuk audiens Indonesia dan menggunakan bahasa yan
     setGeneratedScript(true)
   }
 
+  // ── Angle Twisting: Build prompt ──
+  function buildAnglePrompt() {
+    return `Kamu adalah Content Strategist expert yang ahli dalam angle twisting konten.
+
+Topik/Ide konten original saya: **${angleTopic}**
+
+Tugas: Buat 9 variasi angle yang berbeda dari topik di atas. Untuk SETIAP angle, berikan:
+- **Judul Konten baru** (hook yang menarik)
+- **Hook Pembuka** (1-2 kalimat pertama)
+- **Penjelasan singkat** bagaimana angle ini bekerja
+
+Berikut 9 angle yang harus digunakan:
+
+1. **ACTIONABLE** — Tipe how-to yang aplikatif, menjabarkan langkah-langkah agar audiens tahu action apa yang harus diambil. Contoh: "Kalau kamu naik transportasi umum setiap hari, kamu bisa ngumpulin X juta..."
+
+2. **INSPIRATIONAL** — Menginspirasi audiens dari cerita/pengalaman pribadi, pembelajaran, atau tokoh panutan yang dikagumi.
+
+3. **ANALYTICAL** — Menganalisa sesuatu secara mendalam (strategi brand, perusahaan, tokoh) untuk mengetahui alasan di balik kesuksesan mereka, disertai data pendukung.
+
+4. **NEGATIVE / PAIN** — Manfaatkan negativity bias atau ketakutan untuk stopping power. Contoh: "Kalau nggak mau bangkrut, jangan lakukan ini..."
+
+5. **POSITIVE / DREAM** — Fokus pada mimpi, tujuan, atau hasil positif yang sangat diinginkan audiens.
+
+6. **OPPOSITE / CONTRARIAN** — Opini berlawanan dari status quo atau unpopular opinion. Contoh: "Berhenti belajar time management"
+
+7. **OBSERVATION** — Dari kacamata pengamat personal, menggunakan kata ganti pengalaman pribadi yang terasa nyata.
+
+8. **A VERSUS B** — Membandingkan dua hal/metode/produk, lalu jelaskan mana yang lebih baik dan mengapa.
+
+9. **LIST** — Daftar 5-7 poin menggunakan angka. Contoh: "5 buku yang mengubah hidup gue" atau "3 alasan kenapa..."
+
+Gunakan bahasa Indonesia yang natural dan relevan untuk audiens media sosial Indonesia.
+Format output harus jelas per angle dengan pemisah yang rapi.`
+  }
+
+  async function handleGenerateAngle() {
+    if (!angleTopic.trim()) {
+      toast.error('Masukkan topik/ide konten terlebih dahulu.')
+      return false
+    }
+    await generateAndRedirect(buildAnglePrompt())
+    setGeneratedAngle(true)
+  }
+
   async function handleSaveToPlan(idea) {
     if (!user) return
     setSaving(true)
@@ -147,14 +195,15 @@ Pastikan semua konten relevan untuk audiens Indonesia dan menggunakan bahasa yan
 
   return (
     <ModuleLayout
-      title="💡 Content Ideas"
-      subtitle="Generate ide konten viral dan script/caption lengkap untuk konten Anda."
+      title="💡 Content Generator"
+      subtitle="Generate ide konten, script/caption, dan angle twisting untuk konten Anda."
     >
       {/* ── Tab Switcher ── */}
       <div className="flex gap-1 p-1 rounded-lg" style={{ background: 'var(--bg-input)', border: '1px solid var(--border-color)' }}>
         {[
           { key: 'ideas', label: 'Ide Konten', icon: Lightbulb },
           { key: 'script', label: 'Script & Caption', icon: Clapperboard },
+          { key: 'angle', label: 'Angle Twisting', icon: RotateCcw },
         ].map(({ key, label, icon: Icon }) => (
           <button
             key={key}
@@ -306,6 +355,33 @@ Pastikan semua konten relevan untuk audiens Indonesia dan menggunakan bahasa yan
           {generatedScript && (
             <InfoBanner>
               Script dan caption siap di ChatGPT! Setelah mendapat hasilnya, buka <strong>Content Planner</strong> untuk menyimpan dan mengelola draft konten Anda.
+            </InfoBanner>
+          )}
+        </>
+      )}
+
+      {/* ══════════════ ANGLE TWISTING TAB ══════════════ */}
+      {activeTab === 'angle' && (
+        <>
+          <InfoBanner>
+            <strong>Angle Twisting</strong> — Ubah 1 topik konten menjadi 9 konten berbeda menggunakan 9 angle:
+            Actionable, Inspirational, Analytical, Negative/Pain, Positive/Dream, Contrarian, Observation, A vs B, dan List.
+          </InfoBanner>
+
+          <FormCard>
+            <Field
+              id="angle-topic"
+              label="Topik / Ide Konten Original"
+              value={angleTopic}
+              onChange={setAngleTopic}
+              placeholder="Contoh: Pentingnya investasi sejak muda"
+            />
+            <GenerateButton onClick={handleGenerateAngle} label="Generate 9 Angle Twisting" />
+          </FormCard>
+
+          {generatedAngle && (
+            <InfoBanner>
+              9 angle sudah di-generate! Paste hasilnya di tab <strong>Ide Konten</strong> untuk menyimpan ke Content Planner.
             </InfoBanner>
           )}
         </>

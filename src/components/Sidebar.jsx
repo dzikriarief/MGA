@@ -6,10 +6,13 @@ import { supabase } from '../supabaseClient'
 import {
   LayoutDashboard,
   Target,
+  Search,
   BookOpen,
   FileText,
+  Tag,
   Lightbulb,
   CalendarDays,
+  Briefcase,
   LogOut,
   ChevronLeft,
   ChevronRight,
@@ -22,13 +25,16 @@ import {
 import toast from 'react-hot-toast'
 
 const NAV_ITEMS = [
-  { id: 'command',     label: 'Command Center',       icon: LayoutDashboard, section: null },
-  { id: 'divider-1',  type: 'divider', sectionLabel: 'ECOSYSTEM' },
-  { id: 'niche',      label: 'Niche Finder',          icon: Target },
-  { id: 'persona',    label: 'Persona & Pillar',      icon: BookOpen },
-  { id: 'bio',        label: 'Bio Generator',          icon: FileText },
-  { id: 'ideas',      label: 'Content Ideas',          icon: Lightbulb },
-  { id: 'planner',    label: 'Content Planner',        icon: CalendarDays },
+  { id: 'command',      label: 'Command Center',       icon: LayoutDashboard, section: null },
+  { id: 'divider-1',    type: 'divider', sectionLabel: 'ECOSYSTEM' },
+  { id: 'niche',        label: 'Niche Finder',          icon: Target },
+  { id: 'competitors',  label: 'Riset Competitors',     icon: Search },
+  { id: 'persona',      label: 'Persona & Pillar',      icon: BookOpen },
+  { id: 'bio',          label: 'Bio Generator',          icon: FileText },
+  { id: 'offers',       label: 'Offers',                 icon: Tag },
+  { id: 'ideas',        label: 'Content Generator',      icon: Lightbulb },
+  { id: 'planner',      label: 'Content Planner',        icon: CalendarDays },
+  { id: 'projects',     label: 'Projects',               icon: Briefcase },
 ]
 
 export default function Sidebar({ activeModule, onModuleChange }) {
