@@ -4,8 +4,10 @@ import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from './context/AuthContext'
 import { ThemeProvider, useTheme } from './context/ThemeContext'
 import AuthGuard from './components/AuthGuard'
+import AdminGuard from './components/AdminGuard'
 import AuthPage from './pages/Auth'
 import Dashboard from './pages/Dashboard'
+import AdminDashboard from './pages/AdminDashboard'
 
 function AppToaster() {
   const { isDark } = useTheme()
@@ -49,6 +51,14 @@ export default function App() {
                 <AuthGuard>
                   <Dashboard />
                 </AuthGuard>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <AdminGuard>
+                  <AdminDashboard />
+                </AdminGuard>
               }
             />
             <Route path="*" element={<Navigate to="/" replace />} />

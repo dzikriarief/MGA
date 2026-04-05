@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
 import { supabase } from '../supabaseClient'
@@ -13,6 +14,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Menu,
+  Shield,
   X,
   Sun,
   Moon,
@@ -30,10 +32,12 @@ const NAV_ITEMS = [
 ]
 
 export default function Sidebar({ activeModule, onModuleChange }) {
-  const { user } = useAuth()
+  const { user, profile } = useAuth()
   const { theme, toggleTheme, isDark } = useTheme()
+  const navigate = useNavigate()
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const isAdmin = profile?.role === 'admin'
 
   async function handleSignOut() {
     await supabase.auth.signOut()
@@ -119,6 +123,21 @@ export default function Sidebar({ activeModule, onModuleChange }) {
           )
         })}
       </nav>
+
+      {/* ── Admin link ── */}
+      {isAdmin && (
+        <div className="px-2 pt-2">
+          <button
+            onClick={() => { navigate('/admin'); setMobileOpen(false) }}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${collapsed ? 'justify-center' : ''}`}
+            style={{ background: 'rgba(242, 202, 80, 0.08)', color: '#f2ca50', border: '1px solid rgba(242, 202, 80, 0.15)' }}
+            title={collapsed ? 'Admin Panel' : undefined}
+          >
+            <Shield className="w-4 h-4 flex-shrink-0" />
+            {!collapsed && 'Admin Panel'}
+          </button>
+        </div>
+      )}
 
       {/* ── Bottom: Theme + User + Sign out ── */}
       <div className="px-2 pb-3 pt-2 space-y-1" style={{ borderTop: '1px solid var(--border-color)' }}>
