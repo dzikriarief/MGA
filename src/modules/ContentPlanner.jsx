@@ -4,11 +4,17 @@ import { supabase } from '../supabaseClient'
 import { ModuleLayout } from '../components/ui/ModuleUI'
 import {
   PlusCircle, Trash2, Loader2, RefreshCw, CalendarDays, Filter,
-  FileEdit, Save, X, ChevronDown
+  FileEdit, Save, X, ChevronDown, Instagram, Youtube
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const STATUS_OPTIONS = ['Idea', 'Scripting', 'Ready', 'Done']
+
+const PLATFORM_LIST = ['Instagram', 'Facebook', 'TikTok', 'Threads', 'Twitter', 'LinkedIn', 'YouTube']
+const PLATFORM_EMOJI = {
+  Instagram: '📸', Facebook: '📘', TikTok: '🎵', Threads: '🧵',
+  Twitter: '𝕏', LinkedIn: '💼', YouTube: '▶️'
+}
 
 const STATUS_COLORS = {
   'Idea':      { bg: 'rgba(113,113,122,0.15)', text: '#a1a1aa', border: 'rgba(113,113,122,0.3)' },
@@ -273,8 +279,9 @@ export default function ContentPlanner() {
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [filterStatus, setFilterStatus] = useState('All')
+  const [filterPlatform, setFilterPlatform] = useState('All')
   const [showAddRow, setShowAddRow] = useState(false)
-  const [newItem, setNewItem] = useState({ judul: '', pilar: '', status: 'Idea', deadline: '' })
+  const [newItem, setNewItem] = useState({ judul: '', pilar: '', status: 'Idea', deadline: '', platform: 'Instagram' })
   const [addingSaving, setAddingSaving] = useState(false)
   const [draftItem, setDraftItem] = useState(null) // item being draft-edited
 
@@ -331,12 +338,13 @@ export default function ContentPlanner() {
       pilar: newItem.pilar,
       status: newItem.status,
       deadline: newItem.deadline || null,
+      platform: newItem.platform || 'Instagram',
     })
     if (error) {
       toast.error('Gagal menyimpan: ' + error.message)
     } else {
       toast.success('Ide konten ditambahkan ✓')
-      setNewItem({ judul: '', pilar: '', status: 'Idea', deadline: '' })
+      setNewItem({ judul: '', pilar: '', status: 'Idea', deadline: '', platform: 'Instagram' })
       setShowAddRow(false)
       await fetchItems()
     }
@@ -348,7 +356,11 @@ export default function ContentPlanner() {
     setDraftItem(null)
   }
 
-  const filtered = filterStatus === 'All' ? items : items.filter(i => i.status === filterStatus)
+  const filtered = items.filter(i => {
+    if (filterStatus !== 'All' && i.status !== filterStatus) return false
+    if (filterPlatform !== 'All' && (i.platform || 'Instagram') !== filterPlatform) return false
+    return true
+  })
 
   const stats = STATUS_OPTIONS.reduce((acc, s) => {
     acc[s] = items.filter(i => i.status === s).length
@@ -401,6 +413,20 @@ export default function ContentPlanner() {
               {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
+          {/* Platform filter */}
+          <div className="flex items-center gap-2 flex-wrap">
+            {['All', ...PLATFORM_LIST].map(p => (
+              <button key={p} type="button" onClick={() => setFilterPlatform(p)}
+                className="px-2 py-1 rounded-md text-[10px] font-medium transition-all"
+                style={{
+                  background: filterPlatform === p ? 'rgba(242,202,80,0.12)' : 'transparent',
+                  color: filterPlatform === p ? '#f2ca50' : 'var(--text-muted)',
+                  border: filterPlatform === p ? '1px solid rgba(242,202,80,0.2)' : '1px solid var(--border-color)',
+                }}>
+                {p === 'All' ? '🌐 Semua' : `${PLATFORM_EMOJI[p] || ''} ${p}`}
+              </button>
+            ))}
+          </div>
           <button type="button" onClick={fetchItems} className="btn-ghost ml-auto sm:ml-0" title="Refresh data">
             <RefreshCw className="w-4 h-4" />
           </button>
@@ -448,6 +474,14 @@ export default function ContentPlanner() {
                 onChange={e => setNewItem(p => ({ ...p, deadline: e.target.value }))}
                 className="input-base" />
             </div>
+            <div>
+              <label className="label-base">Platform</label>
+              <select value={newItem.platform}
+                onChange={e => setNewItem(p => ({ ...p, platform: e.target.value }))}
+                className="input-base">
+                {PLATFORM_LIST.map(p => <option key={p} value={p}>{PLATFORM_EMOJI[p]} {p}</option>)}
+              </select>
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <button type="button" onClick={handleAddItem} disabled={addingSaving} className="btn-primary">
@@ -480,7 +514,7 @@ export default function ContentPlanner() {
             <table className="w-full text-sm">
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
-                  {['Judul Ide', 'Pilar', 'Status', 'Deadline', 'Aksi'].map(h => (
+                  {['Judul Ide', 'Platform', 'Pilar', 'Status', 'Deadline', 'Aksi'].map(h => (
                     <th key={h} className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider"
                         style={{ color: 'var(--text-muted)' }}>{h}</th>
                   ))}
@@ -500,6 +534,12 @@ export default function ContentPlanner() {
                           Draft tersedia
                         </span>
                       )}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="text-xs font-medium px-2 py-0.5 rounded-full"
+                        style={{ background: 'var(--bg-input)', border: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}>
+                        {PLATFORM_EMOJI[item.platform] || '📸'} {item.platform || 'Instagram'}
+                      </span>
                     </td>
                     <td className="px-4 py-3">
                       {item.pilar ? (
