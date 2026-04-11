@@ -15,6 +15,7 @@ export default function Persona() {
   const [kelebihan, setKelebihan] = useState('')
   const [kelemahan, setKelemahan] = useState('')
   const [tone, setTone] = useState('Casual')
+  const [personalStory, setPersonalStory] = useState('')
   const [generated, setGenerated] = useState(false)
 
   // Final result fields
@@ -26,6 +27,7 @@ export default function Persona() {
       if (profile.kelebihan) setKelebihan(profile.kelebihan)
       if (profile.kelemahan) setKelemahan(profile.kelemahan)
       if (profile.tone_of_voice) setTone(profile.tone_of_voice)
+      if (profile.personal_story) setPersonalStory(profile.personal_story)
       // Load final results
       if (Array.isArray(profile.final_pillars) && profile.final_pillars.length > 0) {
         setFinalPillars(profile.final_pillars.join('\n'))
@@ -48,6 +50,7 @@ Informasi tentang saya:
 - Kelebihan / Strengths: ${kelebihan}
 - Kelemahan / Weaknesses: ${kelemahan}
 - Tone of Voice yang diinginkan: ${tone}
+- Cerita / Story Personal: ${personalStory || '[belum diisi]'}
 
 Tugas kamu:
 
@@ -62,6 +65,11 @@ Tugas kamu:
    - Versi lengkap (1 paragraf, untuk halaman About)
 
 3. **Persona Statement** — Jelaskan persona brand saya (karakter, values, cara berkomunikasi)
+
+4. **Story Angle** — Berdasarkan cerita personal saya, identifikasi:
+   - Cerita unik apa yang bisa diangkat sebagai diferensiasi dari kompetitor
+   - Bagaimana cerita ini bisa digunakan di konten (origin story, struggle story, transformation story)
+   - 3 ide konten storytelling berdasarkan cerita personal saya
 
 Semua konten harus menggunakan tone "${tone}".
 Format jawaban dengan rapi, gunakan heading dan bullet points.`
@@ -81,6 +89,7 @@ Format jawaban dengan rapi, gunakan heading dan bullet points.`
       kelebihan,
       kelemahan,
       tone_of_voice: tone,
+      personal_story: personalStory,
     })
     toast.success('Data persona disimpan ✓')
   }
@@ -132,6 +141,15 @@ Format jawaban dengan rapi, gunakan heading dan bullet points.`
           value={tone}
           onChange={setTone}
           options={TONE_OPTIONS}
+        />
+
+        <TextareaField
+          id="personal-story"
+          label="🎙️ Cerita / Story Personal Anda"
+          value={personalStory}
+          onChange={setPersonalStory}
+          placeholder="Ceritakan perjalanan unik Anda — struggle, turning point, transformasi, pengalaman khas yang membuat Anda berbeda dari orang lain di niche yang sama. Cerita ini akan menjadi senjata diferensiasi brand Anda."
+          rows={4}
         />
 
         <div className="flex items-center gap-3 pt-1">

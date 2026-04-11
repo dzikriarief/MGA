@@ -27,7 +27,7 @@ import toast from 'react-hot-toast'
 const NAV_ITEMS = [
   { id: 'command',      label: 'Command Center',       icon: LayoutDashboard, section: null },
   { id: 'divider-1',    type: 'divider', sectionLabel: 'ECOSYSTEM' },
-  { id: 'niche',        label: 'Niche Finder',          icon: Target },
+  { id: 'niche',        label: 'Value Discovery',       icon: Target },
   { id: 'competitors',  label: 'Riset Competitors',     icon: Search },
   { id: 'persona',      label: 'Persona & Pillar',      icon: BookOpen },
   { id: 'bio',          label: 'Bio Generator',          icon: FileText },

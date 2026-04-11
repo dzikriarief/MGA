@@ -6,7 +6,7 @@ import {
   Target, BookOpen, FileText, Lightbulb, CalendarDays,
   Camera, Edit3, ChevronRight, TrendingUp, Users, Package,
   Youtube, Instagram, Twitter, Linkedin, Save, Loader2, Plus, Trash2, X,
-  Download, FileDown
+  Download, FileDown, Search, Tag, Briefcase
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -30,11 +30,14 @@ const DEFAULT_OFFERS = [
 
 /* ── Module Nav Cards ── */
 const MODULE_CARDS = [
-  { id: 'niche',   label: 'Niche Finder',     icon: Target,       desc: 'Temukan posisi unik Anda' },
-  { id: 'persona', label: 'Persona & Pillar', icon: BookOpen,     desc: 'Bangun persona & pilar konten' },
-  { id: 'bio',     label: 'Bio Generator',     icon: FileText,     desc: 'Generate bio yang menarik' },
-  { id: 'ideas',   label: 'Content Ideas',     icon: Lightbulb,    desc: 'Ide konten & script viral' },
-  { id: 'planner', label: 'Content Planner',   icon: CalendarDays, desc: 'Kelola rencana konten' },
+  { id: 'niche',       label: 'Value Discovery',    icon: Target,       desc: 'Temukan posisi unik Anda' },
+  { id: 'competitors', label: 'Riset Competitors',  icon: Search,       desc: 'Riset akun kompetitor & market' },
+  { id: 'persona',     label: 'Persona & Pillar',   icon: BookOpen,     desc: 'Bangun persona & pilar konten' },
+  { id: 'bio',         label: 'Bio Generator',      icon: FileText,     desc: 'Generate bio yang menarik' },
+  { id: 'offers',      label: 'Offers',             icon: Tag,          desc: 'Rancang penawaran brand' },
+  { id: 'ideas',       label: 'Content Generator',  icon: Lightbulb,    desc: 'Ide & script multi-platform' },
+  { id: 'planner',     label: 'Content Planner',    icon: CalendarDays, desc: 'Kelola rencana konten' },
+  { id: 'projects',    label: 'Projects',           icon: Briefcase,    desc: 'Kelola project & endorse' },
 ]
 
 /* ── Donut Chart (SVG) ── */

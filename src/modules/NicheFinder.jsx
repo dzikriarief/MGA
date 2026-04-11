@@ -111,7 +111,7 @@ Format jawaban dengan heading, bullet points, dan emoji agar mudah dibaca.`
 
   return (
     <ModuleLayout
-      title="🎯 Niche Finder"
+      title="🎯 Value Discovery"
       subtitle="Temukan posisi unik Anda di pasar dengan menggabungkan 4 irisan penting: Passion, Keahlian, Peluang Bisnis, dan Kebutuhan Pasar."
     >
       {/* ── 4 Intersection Grid ── */}

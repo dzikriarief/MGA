@@ -16,6 +16,13 @@ const PLATFORM_EMOJI = {
   Twitter: '𝕏', LinkedIn: '💼', YouTube: '▶️'
 }
 
+const FUNNEL_LIST = ['TOFU', 'MOFU', 'BOFU']
+const FUNNEL_STYLE = {
+  TOFU: { bg: 'rgba(59,130,246,0.12)', color: '#3b82f6', label: '🔝 TOFU' },
+  MOFU: { bg: 'rgba(245,158,11,0.12)', color: '#f59e0b', label: '🤝 MOFU' },
+  BOFU: { bg: 'rgba(34,197,94,0.12)', color: '#22c55e', label: '💰 BOFU' },
+}
+
 const STATUS_COLORS = {
   'Idea':      { bg: 'rgba(113,113,122,0.15)', text: '#a1a1aa', border: 'rgba(113,113,122,0.3)' },
   'Scripting': { bg: 'rgba(59,130,246,0.12)',  text: '#60a5fa', border: 'rgba(59,130,246,0.3)' },
@@ -281,7 +288,7 @@ export default function ContentPlanner() {
   const [filterStatus, setFilterStatus] = useState('All')
   const [filterPlatform, setFilterPlatform] = useState('All')
   const [showAddRow, setShowAddRow] = useState(false)
-  const [newItem, setNewItem] = useState({ judul: '', pilar: '', status: 'Idea', deadline: '', platform: 'Instagram' })
+  const [newItem, setNewItem] = useState({ judul: '', pilar: '', status: 'Idea', deadline: '', platform: 'Instagram', funnel: 'TOFU' })
   const [addingSaving, setAddingSaving] = useState(false)
   const [draftItem, setDraftItem] = useState(null) // item being draft-edited
 
@@ -339,12 +346,13 @@ export default function ContentPlanner() {
       status: newItem.status,
       deadline: newItem.deadline || null,
       platform: newItem.platform || 'Instagram',
+      funnel: newItem.funnel || 'TOFU',
     })
     if (error) {
       toast.error('Gagal menyimpan: ' + error.message)
     } else {
       toast.success('Ide konten ditambahkan ✓')
-      setNewItem({ judul: '', pilar: '', status: 'Idea', deadline: '', platform: 'Instagram' })
+      setNewItem({ judul: '', pilar: '', status: 'Idea', deadline: '', platform: 'Instagram', funnel: 'TOFU' })
       setShowAddRow(false)
       await fetchItems()
     }
@@ -482,6 +490,14 @@ export default function ContentPlanner() {
                 {PLATFORM_LIST.map(p => <option key={p} value={p}>{PLATFORM_EMOJI[p]} {p}</option>)}
               </select>
             </div>
+            <div>
+              <label className="label-base">Funnel</label>
+              <select value={newItem.funnel}
+                onChange={e => setNewItem(p => ({ ...p, funnel: e.target.value }))}
+                className="input-base">
+                {FUNNEL_LIST.map(f => <option key={f} value={f}>{FUNNEL_STYLE[f].label}</option>)}
+              </select>
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <button type="button" onClick={handleAddItem} disabled={addingSaving} className="btn-primary">
@@ -514,7 +530,7 @@ export default function ContentPlanner() {
             <table className="w-full text-sm">
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
-                  {['Judul Ide', 'Platform', 'Pilar', 'Status', 'Deadline', 'Aksi'].map(h => (
+                  {['Judul Ide', 'Platform', 'Funnel', 'Pilar', 'Status', 'Deadline', 'Aksi'].map(h => (
                     <th key={h} className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider"
                         style={{ color: 'var(--text-muted)' }}>{h}</th>
                   ))}
@@ -540,6 +556,17 @@ export default function ContentPlanner() {
                         style={{ background: 'var(--bg-input)', border: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}>
                         {PLATFORM_EMOJI[item.platform] || '📸'} {item.platform || 'Instagram'}
                       </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      {(() => {
+                        const fs = FUNNEL_STYLE[item.funnel] || FUNNEL_STYLE.TOFU
+                        return (
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase"
+                            style={{ background: fs.bg, color: fs.color }}>
+                            {item.funnel || 'TOFU'}
+                          </span>
+                        )
+                      })()}
                     </td>
                     <td className="px-4 py-3">
                       {item.pilar ? (

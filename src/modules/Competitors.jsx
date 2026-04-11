@@ -5,8 +5,8 @@ import { ModuleLayout, FormCard, Field, TextareaField, GenerateButton, InfoBanne
 import { generateAndRedirect } from '../utils/generateAndRedirect'
 import {
   Plus, Trash2, Edit3, Save, X, ChevronDown, ChevronUp,
-  Users, Eye, TrendingUp, DollarSign, Loader2, Instagram, Youtube,
-  BarChart3, HelpCircle
+  Users, TrendingUp, DollarSign, Loader2, Instagram, Youtube,
+  BarChart3, ExternalLink, Copy, Sparkles
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -15,35 +15,76 @@ const PLATFORM_TABS = [
   { key: 'Long-form', label: 'Long-form (YouTube)', icon: Youtube },
 ]
 
-function TopKontenEditor({ items, onChange }) {
+/* ═══════════ PRODUCT EDITOR ═══════════ */
+function ProductEditor({ items, onChange }) {
+  const list = Array.isArray(items) ? items : []
   function update(idx, field, val) {
-    const copy = [...items]
-    copy[idx] = { ...copy[idx], [field]: val }
-    onChange(copy)
+    const copy = [...list]; copy[idx] = { ...copy[idx], [field]: val }; onChange(copy)
   }
-  function add() { onChange([...items, { title: '', link: '' }]) }
-  function remove(idx) { onChange(items.filter((_, i) => i !== idx)) }
+  function add() { onChange([...list, { name: '', price: '' }]) }
+  function remove(idx) { onChange(list.filter((_, i) => i !== idx)) }
 
   return (
     <div>
-      <label className="label-base">Top 10 Konten (Link)</label>
+      <label className="label-base">Produk / Layanan & Harga</label>
       <div className="space-y-2 mt-1">
-        {items.map((item, i) => (
+        {list.map((item, i) => (
           <div key={i} className="flex gap-2 items-center">
-            <span className="text-xs font-mono w-5 text-right flex-shrink-0" style={{ color: 'var(--text-muted)' }}>{i + 1}.</span>
-            <input value={item.title} onChange={e => update(i, 'title', e.target.value)}
-              placeholder="Judul konten" className="input-base text-sm py-1.5 flex-1" />
-            <input value={item.link} onChange={e => update(i, 'link', e.target.value)}
-              placeholder="https://..." className="input-base text-sm py-1.5 flex-1" />
+            <input value={item.name} onChange={e => update(i, 'name', e.target.value)}
+              placeholder="Nama produk/jasa" className="input-base text-sm py-1.5 flex-1" />
+            <input value={item.price} onChange={e => update(i, 'price', e.target.value)}
+              placeholder="Rp 500.000" className="input-base text-sm py-1.5 w-32" />
             <button type="button" onClick={() => remove(i)} className="p-1 rounded" style={{ color: 'var(--text-muted)' }}>
               <X className="w-3.5 h-3.5" />
             </button>
           </div>
         ))}
       </div>
-      {items.length < 10 && (
-        <button type="button" onClick={add} className="text-xs font-medium mt-2 flex items-center gap-1"
-          style={{ color: '#f2ca50' }}>
+      <button type="button" onClick={add} className="text-xs font-medium mt-2 flex items-center gap-1" style={{ color: '#f2ca50' }}>
+        <Plus className="w-3 h-3" /> Tambah produk
+      </button>
+    </div>
+  )
+}
+
+/* ═══════════ TOP KONTEN EDITOR (with views + breakdown) ═══════════ */
+function TopKontenEditor({ items, onChange }) {
+  const list = Array.isArray(items) ? items : []
+  function update(idx, field, val) {
+    const copy = [...list]; copy[idx] = { ...copy[idx], [field]: val }; onChange(copy)
+  }
+  function add() { onChange([...list, { title: '', link: '', views: '', breakdown: '' }]) }
+  function remove(idx) { onChange(list.filter((_, i) => i !== idx)) }
+
+  return (
+    <div>
+      <label className="label-base">Top 10 Konten (Link, Views & Breakdown)</label>
+      <div className="space-y-3 mt-1">
+        {list.map((item, i) => (
+          <div key={i} className="p-3 rounded-lg space-y-2" style={{ background: 'var(--bg-primary)', border: '1px solid var(--border-color)' }}>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-mono w-5 text-right flex-shrink-0" style={{ color: 'var(--text-muted)' }}>{i + 1}.</span>
+              <input value={item.title} onChange={e => update(i, 'title', e.target.value)}
+                placeholder="Judul konten" className="input-base text-sm py-1.5 flex-1" />
+              <button type="button" onClick={() => remove(i)} className="p-1 rounded" style={{ color: 'var(--text-muted)' }}>
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+            <div className="grid grid-cols-2 gap-2 pl-7">
+              <input value={item.link || ''} onChange={e => update(i, 'link', e.target.value)}
+                placeholder="https://..." className="input-base text-xs py-1" />
+              <input value={item.views || ''} onChange={e => update(i, 'views', e.target.value)}
+                placeholder="Views (misal: 1.2M)" className="input-base text-xs py-1" />
+            </div>
+            <div className="pl-7">
+              <input value={item.breakdown || ''} onChange={e => update(i, 'breakdown', e.target.value)}
+                placeholder="Breakdown: ide apa, hook apa, style editing gimana..." className="input-base text-xs py-1 w-full" />
+            </div>
+          </div>
+        ))}
+      </div>
+      {list.length < 10 && (
+        <button type="button" onClick={add} className="text-xs font-medium mt-2 flex items-center gap-1" style={{ color: '#f2ca50' }}>
           <Plus className="w-3 h-3" /> Tambah konten
         </button>
       )}
@@ -51,9 +92,34 @@ function TopKontenEditor({ items, onChange }) {
   )
 }
 
-function CompetitorCard({ comp, onEdit, onDelete }) {
+/* ═══════════ CHIP SELECTOR ═══════════ */
+function ChipSelector({ label, options, value, onChange }) {
+  return (
+    <div>
+      <label className="label-base">{label}</label>
+      <div className="flex flex-wrap gap-2 mt-1">
+        {options.map(opt => (
+          <button key={opt} type="button" onClick={() => onChange(opt)}
+            className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+            style={{
+              background: value === opt ? 'rgba(242,202,80,0.15)' : 'var(--bg-input)',
+              color: value === opt ? '#f2ca50' : 'var(--text-secondary)',
+              border: value === opt ? '1px solid rgba(242,202,80,0.4)' : '1px solid var(--border-color)',
+            }}>
+            {opt}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+/* ═══════════ COMPETITOR CARD ═══════════ */
+function CompetitorCard({ comp, isLongForm, onEdit, onDelete }) {
   const [expanded, setExpanded] = useState(false)
   const topKonten = Array.isArray(comp.top_konten) ? comp.top_konten : []
+  const products = Array.isArray(comp.products) ? comp.products : []
+  const followerLabel = isLongForm ? 'Subscribers' : 'Followers'
 
   return (
     <div className="glass-card p-5">
@@ -69,54 +135,78 @@ function CompetitorCard({ comp, onEdit, onDelete }) {
           </div>
         </div>
         <div className="flex items-center gap-1">
-          <span className="px-2 py-0.5 rounded-full text-xs font-medium"
-            style={{ background: comp.platform === 'Short-form' ? 'rgba(131,56,236,0.12)' : 'rgba(255,0,0,0.1)',
-              color: comp.platform === 'Short-form' ? '#8338ec' : '#ff0000' }}>
-            {comp.platform === 'Short-form' ? 'IG' : 'YT'}
-          </span>
-          <button onClick={() => onEdit(comp)} className="p-1.5 rounded-lg" style={{ color: 'var(--text-muted)' }}>
-            <Edit3 className="w-3.5 h-3.5" />
-          </button>
-          <button onClick={() => onDelete(comp.id)} className="p-1.5 rounded-lg" style={{ color: 'var(--text-muted)' }}>
-            <Trash2 className="w-3.5 h-3.5" />
-          </button>
+          <button onClick={() => onEdit(comp)} className="p-1.5 rounded-lg" style={{ color: 'var(--text-muted)' }}><Edit3 className="w-3.5 h-3.5" /></button>
+          <button onClick={() => onDelete(comp.id)} className="p-1.5 rounded-lg" style={{ color: 'var(--text-muted)' }}><Trash2 className="w-3.5 h-3.5" /></button>
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-3 mt-4">
+      {/* Tags row */}
+      <div className="flex flex-wrap gap-1.5 mt-3">
+        <span className="px-2 py-0.5 rounded-full text-[10px] font-medium"
+          style={{ background: comp.platform === 'Short-form' ? 'rgba(131,56,236,0.12)' : 'rgba(255,0,0,0.1)', color: comp.platform === 'Short-form' ? '#8338ec' : '#ff0000' }}>
+          {comp.platform === 'Short-form' ? 'IG' : 'YT'}
+        </span>
+        {comp.scope && <span className="px-2 py-0.5 rounded-full text-[10px] font-medium" style={{ background: 'rgba(59,130,246,0.1)', color: '#3b82f6' }}>{comp.scope}</span>}
+        {comp.niche_relevance && <span className="px-2 py-0.5 rounded-full text-[10px] font-medium" style={{ background: 'rgba(34,197,94,0.1)', color: '#22c55e' }}>{comp.niche_relevance}</span>}
+        {comp.ticket_level && <span className="px-2 py-0.5 rounded-full text-[10px] font-medium" style={{ background: 'rgba(245,158,11,0.1)', color: '#f59e0b' }}>{comp.ticket_level}</span>}
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-3 mt-3">
         <div className="p-2.5 rounded-lg text-center" style={{ background: 'var(--bg-primary)', border: '1px solid var(--border-color)' }}>
           <p className="text-lg font-bold" style={{ color: '#f2ca50' }}>{(comp.followers || 0).toLocaleString()}</p>
-          <p className="text-[10px] uppercase" style={{ color: 'var(--text-muted)' }}>Followers</p>
+          <p className="text-[10px] uppercase" style={{ color: 'var(--text-muted)' }}>{followerLabel}</p>
         </div>
         <div className="p-2.5 rounded-lg text-center" style={{ background: 'var(--bg-primary)', border: '1px solid var(--border-color)' }}>
           <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{comp.niche || '—'}</p>
           <p className="text-[10px] uppercase" style={{ color: 'var(--text-muted)' }}>Niche</p>
         </div>
         <div className="p-2.5 rounded-lg text-center" style={{ background: 'var(--bg-primary)', border: '1px solid var(--border-color)' }}>
-          <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{topKonten.length}</p>
-          <p className="text-[10px] uppercase" style={{ color: 'var(--text-muted)' }}>Top Konten</p>
+          <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{products.length || 0}</p>
+          <p className="text-[10px] uppercase" style={{ color: 'var(--text-muted)' }}>Produk</p>
         </div>
       </div>
 
       {comp.bio && <p className="text-xs mt-3 p-2.5 rounded-lg" style={{ background: 'var(--bg-primary)', color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>{comp.bio}</p>}
-      {comp.produk && <p className="text-xs mt-2" style={{ color: 'var(--text-muted)' }}><strong>Produk:</strong> {comp.produk}</p>}
 
-      {topKonten.length > 0 && (
-        <button onClick={() => setExpanded(!expanded)} className="text-xs font-medium mt-3 flex items-center gap-1 w-full" style={{ color: '#f2ca50' }}>
-          {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-          {expanded ? 'Sembunyikan' : 'Lihat'} Top Konten
-        </button>
-      )}
-      {expanded && topKonten.length > 0 && (
+      {/* Products */}
+      {products.length > 0 && (
         <div className="mt-2 space-y-1">
-          {topKonten.map((k, i) => (
-            <div key={i} className="flex items-center gap-2 text-xs p-1.5 rounded" style={{ background: 'var(--bg-primary)' }}>
-              <span className="font-mono w-4 text-right" style={{ color: 'var(--text-muted)' }}>{i + 1}</span>
-              <span className="flex-1 truncate" style={{ color: 'var(--text-primary)' }}>{k.title || 'Untitled'}</span>
-              {k.link && <a href={k.link} target="_blank" rel="noreferrer" className="text-xs" style={{ color: '#f2ca50' }}>🔗</a>}
+          <p className="text-[10px] uppercase font-semibold" style={{ color: 'var(--text-muted)' }}>Produk/Layanan</p>
+          {products.map((p, i) => (
+            <div key={i} className="flex items-center justify-between text-xs px-2.5 py-1.5 rounded" style={{ background: 'var(--bg-primary)', border: '1px solid var(--border-color)' }}>
+              <span style={{ color: 'var(--text-primary)' }}>{p.name || 'Unnamed'}</span>
+              <span className="font-medium" style={{ color: '#f2ca50' }}>{p.price || '—'}</span>
             </div>
           ))}
         </div>
+      )}
+
+      {/* Expand for top konten */}
+      <button onClick={() => setExpanded(!expanded)} className="text-xs font-medium mt-3 flex items-center gap-1 w-full" style={{ color: '#f2ca50' }}>
+        {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+        {expanded ? 'Sembunyikan' : `Lihat Top Konten (${topKonten.length})`}
+      </button>
+      {expanded && topKonten.length > 0 && (
+        <div className="mt-2 space-y-2">
+          {topKonten.map((k, i) => (
+            <div key={i} className="p-2 rounded text-xs space-y-0.5" style={{ background: 'var(--bg-primary)', border: '1px solid var(--border-color)' }}>
+              <div className="flex items-center gap-2">
+                <span className="font-mono w-4 text-right" style={{ color: 'var(--text-muted)' }}>{i + 1}</span>
+                <span className="flex-1 truncate font-medium" style={{ color: 'var(--text-primary)' }}>{k.title || 'Untitled'}</span>
+                {k.views && <span style={{ color: '#f2ca50' }}>👁 {k.views}</span>}
+                {k.link && <a href={k.link} target="_blank" rel="noreferrer" style={{ color: '#f2ca50' }}><ExternalLink className="w-3 h-3" /></a>}
+              </div>
+              {k.breakdown && <p className="pl-6" style={{ color: 'var(--text-muted)' }}>💡 {k.breakdown}</p>}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {comp.notes && (
+        <p className="text-xs mt-2 p-2.5 rounded-lg italic" style={{ background: 'rgba(242,202,80,0.04)', border: '1px solid rgba(242,202,80,0.1)', color: 'var(--text-muted)' }}>
+          📝 {comp.notes}
+        </p>
       )}
     </div>
   )
@@ -133,28 +223,33 @@ export default function Competitors() {
   const [saving, setSaving] = useState(false)
 
   // Form state
-  const [form, setForm] = useState({ username: '', name: '', niche: '', bio: '', produk: '', followers: 0, top_konten: [], notes: '' })
+  const [form, setForm] = useState({
+    username: '', name: '', niche: '', bio: '', produk: '', followers: 0,
+    top_konten: [], notes: '', scope: 'Lokal', niche_relevance: 'Satu Niche',
+    ticket_level: 'Low Ticket', products: []
+  })
 
-  // TAM-SAM-SOM state
+  // Section tabs
   const [activeSection, setActiveSection] = useState('research') // 'research' | 'tamsamsom'
-  const [market, setMarket] = useState({ tam_value: 0, tam_desc: '', sam_value: 0, sam_desc: '', som_value: 0, som_desc: '', avg_revenue_user: 0, assumptions: '' })
-  const [marketSaving, setMarketSaving] = useState(false)
+  // Revenue guide toggle
+  const [showGuide, setShowGuide] = useState(false)
 
   const fetchData = useCallback(async () => {
     if (!user) return
     setLoading(true)
     const { data } = await supabase.from('competitors').select('*').eq('user_id', user.id).order('created_at', { ascending: false })
     setCompetitors(data || [])
-
-    const { data: mkt } = await supabase.from('market_estimation').select('*').eq('user_id', user.id).single()
-    if (mkt) setMarket(mkt)
     setLoading(false)
   }, [user])
 
   useEffect(() => { fetchData() }, [fetchData])
 
   function resetForm() {
-    setForm({ username: '', name: '', niche: '', bio: '', produk: '', followers: 0, top_konten: [], notes: '' })
+    setForm({
+      username: '', name: '', niche: '', bio: '', produk: '', followers: 0,
+      top_konten: [], notes: '', scope: 'Lokal', niche_relevance: 'Satu Niche',
+      ticket_level: 'Low Ticket', products: []
+    })
     setEditId(null)
     setShowForm(false)
   }
@@ -163,7 +258,11 @@ export default function Competitors() {
     setForm({
       username: comp.username, name: comp.name || '', niche: comp.niche || '',
       bio: comp.bio || '', produk: comp.produk || '', followers: comp.followers || 0,
-      top_konten: Array.isArray(comp.top_konten) ? comp.top_konten : [], notes: comp.notes || ''
+      top_konten: Array.isArray(comp.top_konten) ? comp.top_konten : [],
+      notes: comp.notes || '', scope: comp.scope || 'Lokal',
+      niche_relevance: comp.niche_relevance || 'Satu Niche',
+      ticket_level: comp.ticket_level || 'Low Ticket',
+      products: Array.isArray(comp.products) ? comp.products : []
     })
     setEditId(comp.id)
     setPlatformTab(comp.platform || 'Short-form')
@@ -197,20 +296,53 @@ export default function Competitors() {
     fetchData()
   }
 
-  async function saveMarket() {
-    setMarketSaving(true)
-    try {
-      const monthlyEst = (market.som_value || 0) * (market.avg_revenue_user || 0)
-      const payload = { ...market, user_id: user.id, monthly_revenue_est: monthlyEst, updated_at: new Date().toISOString() }
-      const { error } = await supabase.from('market_estimation').upsert(payload, { onConflict: 'user_id' })
-      if (error) throw error
-      toast.success('Estimasi pasar disimpan ✓')
-    } catch (err) { toast.error(err.message) }
-    finally { setMarketSaving(false) }
+  /* ═══ Revenue Reverse-Engineering Calculator ═══ */
+  function calcRevenueEstimates() {
+    const results = competitors.map(c => {
+      const fol = c.followers || 0
+      const products = Array.isArray(c.products) ? c.products : []
+      // Parse average product price
+      let avgPrice = 0
+      if (products.length > 0) {
+        const prices = products.map(p => parseInt(String(p.price || '0').replace(/[^0-9]/g, '')) || 0).filter(p => p > 0)
+        avgPrice = prices.length > 0 ? Math.round(prices.reduce((a, b) => a + b, 0) / prices.length) : 0
+      }
+      const estBuyers = Math.round(fol * 0.001)
+      const estRevenue = estBuyers * avgPrice
+      return { ...c, avgPrice, estBuyers, estRevenue }
+    }).filter(c => c.avgPrice > 0)
+    return results
+  }
+
+  function buildDeepResearchPrompt() {
+    const niche = profile?.niche_final || profile?.niche || '[belum diisi]'
+    const compList = competitors.map(c => `@${c.username} (${c.niche}, ${(c.followers || 0).toLocaleString()} followers)`).join('\n')
+    return `Lakukan riset mendalam tentang market dan revenue di niche "${niche}" di Indonesia.
+
+Data kompetitor yang sudah saya kumpulkan:
+${compList || '(belum ada data kompetitor)'}
+
+Tugas:
+1. Analisa revenue model yang umum digunakan creator/brand di niche "${niche}"
+2. Estimasi rata-rata pendapatan bulanan creator dengan 10K, 50K, 100K, 500K followers
+3. Identifikasi sweet spot harga produk untuk niche ini
+4. Analisa tren pertumbuhan market niche ini di Indonesia (2024-2025)
+5. Rekomendasi strategi monetisasi terbaik untuk pemula di niche ini
+
+Berikan data kuantitatif sebanyak mungkin, sertakan sumber jika ada.`
+  }
+
+  async function handleCopyResearchPrompt() {
+    const prompt = buildDeepResearchPrompt()
+    await navigator.clipboard.writeText(prompt)
+    toast.success('Prompt riset tersalin! Pilih AI di bawah.')
   }
 
   const filtered = competitors.filter(c => c.platform === platformTab)
-  const monthlyRevenue = (market.som_value || 0) * (market.avg_revenue_user || 0)
+  const revenueData = calcRevenueEstimates()
+  const totalEstRevenue = revenueData.reduce((sum, c) => sum + c.estRevenue, 0)
+
+  const followerLabel = platformTab === 'Long-form' ? 'Subscribers' : 'Followers'
 
   return (
     <ModuleLayout title="🔍 Riset Competitors" subtitle="Kumpulkan data riset kompetitor dan estimasi potensi revenue di niche Anda.">
@@ -255,12 +387,23 @@ export default function Competitors() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <Field id="comp-niche" label="Niche" value={form.niche} onChange={v => setForm(f => ({ ...f, niche: v }))} placeholder="Niche mereka" />
-                <Field id="comp-followers" label="Followers" value={form.followers} onChange={v => setForm(f => ({ ...f, followers: v }))} type="number" placeholder="10000" />
+                <Field id="comp-followers" label={followerLabel} value={form.followers} onChange={v => setForm(f => ({ ...f, followers: v }))} type="number" placeholder="10000" />
               </div>
               <TextareaField id="comp-bio" label="Bio" value={form.bio} onChange={v => setForm(f => ({ ...f, bio: v }))} placeholder="Bio/deskripsi akun..." rows={2} />
-              <Field id="comp-produk" label="Produk / Layanan" value={form.produk} onChange={v => setForm(f => ({ ...f, produk: v }))} placeholder="Ebook, course, coaching..." />
+
+              {/* Chip selectors */}
+              <ChipSelector label="Jangkauan Akun" options={['Lokal', 'Global']} value={form.scope} onChange={v => setForm(f => ({ ...f, scope: v }))} />
+              <ChipSelector label="Relevansi Niche" options={['Satu Niche', 'Masih Berhubungan', 'Beda Niche']} value={form.niche_relevance} onChange={v => setForm(f => ({ ...f, niche_relevance: v }))} />
+              <ChipSelector label="Ticket Level" options={['Low Ticket', 'High Ticket', 'Keduanya']} value={form.ticket_level} onChange={v => setForm(f => ({ ...f, ticket_level: v }))} />
+
+              {/* Products */}
+              <ProductEditor items={form.products} onChange={v => setForm(f => ({ ...f, products: v }))} />
+
+              {/* Top Konten */}
               <TopKontenEditor items={form.top_konten} onChange={v => setForm(f => ({ ...f, top_konten: v }))} />
-              <TextareaField id="comp-notes" label="Catatan Riset" value={form.notes} onChange={v => setForm(f => ({ ...f, notes: v }))} placeholder="Insights, strategi yang mereka pakai..." rows={2} />
+
+              <TextareaField id="comp-notes" label="📝 Catatan Riset (insights, strategi, keyword winning, pesan utama yang selalu diulang)" value={form.notes} onChange={v => setForm(f => ({ ...f, notes: v }))} placeholder="Apa strategi utama mereka? Keyword apa yang sering dipakai? Pesan apa yang selalu diulang? Insight unik apa yang Anda temukan?" rows={3} />
+
               <button onClick={handleSave} disabled={saving} className="btn-primary">
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 {editId ? 'Update' : 'Simpan'} Kompetitor
@@ -283,110 +426,116 @@ export default function Competitors() {
           ) : (
             <div className="grid gap-4 sm:grid-cols-2">
               {filtered.map(c => (
-                <CompetitorCard key={c.id} comp={c} onEdit={startEdit} onDelete={handleDelete} />
+                <CompetitorCard key={c.id} comp={c} isLongForm={platformTab === 'Long-form'} onEdit={startEdit} onDelete={handleDelete} />
               ))}
             </div>
           )}
         </>
       )}
 
-      {/* ═══ TAM-SAM-SOM SECTION ═══ */}
+      {/* ═══ REVENUE ESTIMATOR SECTION ═══ */}
       {activeSection === 'tamsamsom' && (
         <>
-          {/* Guide Banner */}
-          <InfoBanner>
-            <strong>Cara menghitung TAM-SAM-SOM:</strong><br/>
-            • <strong>TAM</strong> = Total orang di Indonesia yang tertarik dengan niche Anda (misal: 10 juta orang tertarik keuangan syariah)<br/>
-            • <strong>SAM</strong> = Dari TAM, berapa yang aktif di platform Anda dan bisa dijangkau (misal: 500rb yang aktif di Instagram)<br/>
-            • <strong>SOM</strong> = Dari SAM, berapa yang realistis bisa jadi customer Anda dalam 1 tahun (misal: 5.000 orang)<br/>
-            • <strong>Avg Revenue/User</strong> = Rata-rata pendapatan per customer per bulan (dari produk/jasa Anda)<br/>
-            <em>Gunakan data dari riset kompetitor sebagai referensi!</em>
-          </InfoBanner>
-
-          <FormCard>
-            {/* TAM */}
-            <div className="p-4 rounded-xl" style={{ background: 'var(--bg-primary)', border: '1px solid var(--border-color)' }}>
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(59,130,246,0.12)' }}>
-                  <BarChart3 className="w-4 h-4" style={{ color: '#3b82f6' }} />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>TAM — Total Addressable Market</p>
-                  <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>Total ukuran pasar secara keseluruhan</p>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="label-base">Jumlah (orang)</label>
-                  <input type="number" value={market.tam_value} onChange={e => setMarket(m => ({ ...m, tam_value: parseFloat(e.target.value) || 0 }))} className="input-base" placeholder="10000000" />
-                </div>
-                <div>
-                  <label className="label-base">Keterangan</label>
-                  <input value={market.tam_desc || ''} onChange={e => setMarket(m => ({ ...m, tam_desc: e.target.value }))} className="input-base" placeholder="Sumber data, asumsi..." />
-                </div>
-              </div>
-            </div>
-
-            {/* SAM */}
-            <div className="p-4 rounded-xl" style={{ background: 'var(--bg-primary)', border: '1px solid var(--border-color)' }}>
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(139,92,246,0.12)' }}>
-                  <TrendingUp className="w-4 h-4" style={{ color: '#8b5cf6' }} />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>SAM — Serviceable Available Market</p>
-                  <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>Segmen yang bisa dijangkau platform Anda</p>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="label-base">Jumlah (orang)</label>
-                  <input type="number" value={market.sam_value} onChange={e => setMarket(m => ({ ...m, sam_value: parseFloat(e.target.value) || 0 }))} className="input-base" placeholder="500000" />
-                </div>
-                <div>
-                  <label className="label-base">Keterangan</label>
-                  <input value={market.sam_desc || ''} onChange={e => setMarket(m => ({ ...m, sam_desc: e.target.value }))} className="input-base" placeholder="Cara menghitung..." />
-                </div>
-              </div>
-            </div>
-
-            {/* SOM */}
-            <div className="p-4 rounded-xl" style={{ background: 'var(--bg-primary)', border: '1px solid var(--border-color)' }}>
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(34,197,94,0.12)' }}>
-                  <DollarSign className="w-4 h-4" style={{ color: '#22c55e' }} />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>SOM — Serviceable Obtainable Market</p>
-                  <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>Target realistis yang bisa Anda capai</p>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="label-base">Jumlah (orang)</label>
-                  <input type="number" value={market.som_value} onChange={e => setMarket(m => ({ ...m, som_value: parseFloat(e.target.value) || 0 }))} className="input-base" placeholder="5000" />
-                </div>
-                <div>
-                  <label className="label-base">Avg Revenue / User / Bulan (Rp)</label>
-                  <input type="number" value={market.avg_revenue_user} onChange={e => setMarket(m => ({ ...m, avg_revenue_user: parseFloat(e.target.value) || 0 }))} className="input-base" placeholder="150000" />
-                </div>
-              </div>
-            </div>
-
-            {/* Result */}
-            <div className="p-5 rounded-xl text-center" style={{ background: 'rgba(242,202,80,0.08)', border: '1px solid rgba(242,202,80,0.2)' }}>
-              <p className="text-xs uppercase font-semibold tracking-wide mb-1" style={{ color: '#f2ca50' }}>Estimasi Revenue / Bulan</p>
-              <p className="text-3xl font-bold" style={{ color: '#f2ca50' }}>Rp {monthlyRevenue.toLocaleString('id-ID')}</p>
-              <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>SOM ({(market.som_value || 0).toLocaleString()}) × Rp {(market.avg_revenue_user || 0).toLocaleString('id-ID')}/user</p>
-            </div>
-
-            <TextareaField id="market-assumptions" label="Asumsi & Catatan" value={market.assumptions || ''} onChange={v => setMarket(m => ({ ...m, assumptions: v }))} placeholder="Tulis asumsi perhitungan Anda di sini..." rows={3} />
-
-            <button onClick={saveMarket} disabled={marketSaving} className="btn-primary">
-              {marketSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-              Simpan Estimasi
+          {/* Collapsible Guide */}
+          <div className="glass-card overflow-hidden">
+            <button onClick={() => setShowGuide(!showGuide)} className="w-full flex items-center justify-between px-5 py-3 text-sm font-semibold"
+              style={{ color: '#f2ca50' }}>
+              <span>📖 Cara Menghitung Revenue Estimation</span>
+              {showGuide ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </button>
-          </FormCard>
+            {showGuide && (
+              <div className="px-5 pb-4 text-xs space-y-2" style={{ color: 'var(--text-secondary)', borderTop: '1px solid var(--border-color)' }}>
+                <p className="pt-3"><strong>Formula Reverse-Engineering:</strong></p>
+                <div className="p-3 rounded-lg font-mono text-center" style={{ background: 'rgba(242,202,80,0.06)', border: '1px solid rgba(242,202,80,0.15)', color: '#f2ca50' }}>
+                  Followers × 0.1% × Harga Produk = Est. Revenue/Bulan
+                </div>
+                <p>• <strong>0.1%</strong> = Asumsi konservatif pembeli bulanan dari total followers</p>
+                <p>• Masukkan data produk & harga di setiap kompetitor untuk kalkulasi otomatis</p>
+                <p>• Data ini menjadi patokan <strong>Sweet Spot harga produk</strong> Anda</p>
+                <p>• Untuk riset lebih dalam, gunakan fitur <strong>AI Deep Research</strong> di bawah</p>
+              </div>
+            )}
+          </div>
+
+          {/* Auto-calculated Revenue Table */}
+          <div className="glass-card p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>📊 Revenue Estimation (Auto-Calculated)</h3>
+              <p className="text-[10px] uppercase" style={{ color: 'var(--text-muted)' }}>Based on competitor data</p>
+            </div>
+
+            {revenueData.length === 0 ? (
+              <div className="text-center py-6" style={{ color: 'var(--text-muted)' }}>
+                <DollarSign className="w-6 h-6 mx-auto mb-2 opacity-30" />
+                <p className="text-xs">Tambahkan data produk & harga di kompetitor untuk melihat estimasi revenue.</p>
+              </div>
+            ) : (
+              <>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
+                        {['Kompetitor', 'Followers', 'Avg Harga', 'Est. Buyers/bln', 'Est. Revenue/bln'].map(h => (
+                          <th key={h} className="text-left px-3 py-2 font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)', fontSize: '10px' }}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {revenueData.map(c => (
+                        <tr key={c.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                          <td className="px-3 py-2 font-medium" style={{ color: 'var(--text-primary)' }}>@{c.username}</td>
+                          <td className="px-3 py-2" style={{ color: 'var(--text-secondary)' }}>{(c.followers || 0).toLocaleString()}</td>
+                          <td className="px-3 py-2" style={{ color: 'var(--text-secondary)' }}>Rp {c.avgPrice.toLocaleString('id-ID')}</td>
+                          <td className="px-3 py-2" style={{ color: 'var(--text-secondary)' }}>{c.estBuyers.toLocaleString()}</td>
+                          <td className="px-3 py-2 font-bold" style={{ color: '#f2ca50' }}>Rp {c.estRevenue.toLocaleString('id-ID')}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Total & Sweet Spot */}
+                <div className="grid grid-cols-2 gap-3 mt-4">
+                  <div className="p-4 rounded-xl text-center" style={{ background: 'rgba(242,202,80,0.08)', border: '1px solid rgba(242,202,80,0.2)' }}>
+                    <p className="text-[10px] uppercase font-semibold mb-1" style={{ color: '#f2ca50' }}>Avg Revenue/bln (Kompetitor)</p>
+                    <p className="text-xl font-bold" style={{ color: '#f2ca50' }}>Rp {Math.round(totalEstRevenue / revenueData.length).toLocaleString('id-ID')}</p>
+                  </div>
+                  <div className="p-4 rounded-xl text-center" style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)' }}>
+                    <p className="text-[10px] uppercase font-semibold mb-1" style={{ color: '#22c55e' }}>Sweet Spot Harga Produk</p>
+                    <p className="text-xl font-bold" style={{ color: '#22c55e' }}>
+                      Rp {Math.round(revenueData.reduce((a, b) => a + b.avgPrice, 0) / revenueData.length).toLocaleString('id-ID')}
+                    </p>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* AI Deep Research */}
+          <div className="glass-card p-5 space-y-3">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4" style={{ color: '#f2ca50' }} />
+              <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>AI Deep Research</h3>
+            </div>
+            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+              Generate prompt riset otomatis berdasarkan data kompetitor yang sudah diinput, lalu gunakan AI pilihan Anda.
+            </p>
+            <button onClick={handleCopyResearchPrompt} className="btn-primary w-full justify-center">
+              <Copy className="w-4 h-4" /> Copy Prompt Riset ke Clipboard
+            </button>
+            <div className="flex gap-2">
+              <a href="https://gemini.google.com/app" target="_blank" rel="noreferrer"
+                className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-xs font-medium transition-all"
+                style={{ background: 'rgba(66,133,244,0.1)', color: '#4285F4', border: '1px solid rgba(66,133,244,0.2)' }}>
+                🔬 Gemini Deep Research
+              </a>
+              <a href="https://claude.ai" target="_blank" rel="noreferrer"
+                className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-xs font-medium transition-all"
+                style={{ background: 'rgba(204,120,50,0.1)', color: '#cc7832', border: '1px solid rgba(204,120,50,0.2)' }}>
+                🧠 Claude AI
+              </a>
+            </div>
+          </div>
         </>
       )}
     </ModuleLayout>

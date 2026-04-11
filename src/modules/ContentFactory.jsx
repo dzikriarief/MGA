@@ -5,8 +5,24 @@ import { generateAndRedirect } from '../utils/generateAndRedirect'
 import {
   ModuleLayout, FormCard, Field, SelectField, TextareaField, GenerateButton, InfoBanner
 } from '../components/ui/ModuleUI'
-import { PlusCircle, Loader2, CheckCircle, Clapperboard, Lightbulb, RotateCcw } from 'lucide-react'
+import { PlusCircle, Loader2, CheckCircle, Clapperboard, Lightbulb, RotateCcw, Filter } from 'lucide-react'
 import toast from 'react-hot-toast'
+
+/* ═════════ CONTENT FUNNEL ═════════ */
+const FUNNEL_OPTIONS = [
+  { key: 'TOFU', label: 'TOFU — Awareness', desc: 'Menjaring audiens baru, viral, edukasi ringan', color: '#3b82f6', emoji: '🔝' },
+  { key: 'MOFU', label: 'MOFU — Consideration', desc: 'Membangun trust, case study, proof, storytelling', color: '#f59e0b', emoji: '🤝' },
+  { key: 'BOFU', label: 'BOFU — Conversion', desc: 'Mendorong action, offer, CTA langsung', color: '#22c55e', emoji: '💰' },
+]
+
+const FUNNEL_PROMPT_GUIDE = `
+<FUNNEL_STRATEGY>
+Setiap ide konten HARUS memiliki label funnel:
+- **TOFU (Top of Funnel)**: Konten awareness — menjaring audiens baru, viral potential tinggi, edukasi ringan, hook kuat. Tujuan: reach & followers.
+- **MOFU (Middle of Funnel)**: Konten consideration — membangun trust & authority, case study, storytelling, behind the scenes, proof of expertise. Tujuan: engagement & trust.
+- **BOFU (Bottom of Funnel)**: Konten conversion — mendorong action, soft-selling, testimonial, offer, CTA langsung. Tujuan: leads & sales.
+Rencanakan distribusi funnel yang seimbang agar user punya strategi konten yang lengkap.
+</FUNNEL_STRATEGY>`
 
 /* ═══════════════════════ PLATFORM REGISTRY ═══════════════════════
    Central source of truth for all platform characteristics.
@@ -149,6 +165,7 @@ export default function ContentGenerator() {
   const [pilar, setPilar] = useState('')
   const [jumlahIde, setJumlahIde] = useState('5')
   const [ideaPlatforms, setIdeaPlatforms] = useState(['Instagram'])
+  const [ideaFunnel, setIdeaFunnel] = useState('') // empty = all funnels
   const [ideas, setIdeas] = useState([])
   const [rawIdeas, setRawIdeas] = useState('')
   const [saving, setSaving] = useState(false)
@@ -162,6 +179,7 @@ export default function ContentGenerator() {
   // ── Angle Twisting tab state ──
   const [angleTopic, setAngleTopic] = useState('')
   const [anglePlatform, setAnglePlatform] = useState('Instagram')
+  const [angleFunnel, setAngleFunnel] = useState('')
   const [generatedAngle, setGeneratedAngle] = useState(false)
 
   // Pillars from profile
@@ -190,18 +208,22 @@ Buat ${jumlahIde} ide konten untuk pilar "${pilar}" yang dioptimalkan untuk plat
 
 ${platformSpecs}
 
+${FUNNEL_PROMPT_GUIDE}
+
 <THINKING_PROCESS>
 Sebelum membuat ide, pikirkan langkah berikut (tidak perlu ditampilkan):
 1. Analisa karakteristik audiens tiap platform yang dipilih
 2. Identifikasi format konten terbaik untuk pilar "${pilar}" di tiap platform
 3. Buat ide yang bisa diadaptasi lintas platform TAPI tetap punya elemen unik per platform
 4. Pastikan setiap hook disesuaikan dengan stopping power platform masing-masing
+5. Rencanakan distribusi funnel (TOFU/MOFU/BOFU) yang strategis${ideaFunnel ? `\n6. FOKUS pada funnel: ${ideaFunnel}` : ''}
 </THINKING_PROCESS>
 
 <OUTPUT_FORMAT>
 Untuk setiap ide konten, berikan:
 
 **IDE [nomor]: [Judul Konten — hook yang menarik]**
+**Funnel: [TOFU/MOFU/BOFU]** — [alasan kenapa masuk funnel ini]
 
 | Platform | Format | Hook Pembuka | Level Viral |
 |----------|--------|--------------|-------------|
@@ -214,6 +236,7 @@ ${ideaPlatforms.map(p => `| ${PLATFORMS[p].emoji} ${PLATFORMS[p].label} | [forma
 PENTING:
 - Hook HARUS berbeda per platform (sesuai behavior user platform tersebut)
 - Format HARUS sesuai best practice platform (misal: IG = Reels/Carousel, YouTube = Long-form/Shorts)
+- Setiap ide HARUS punya label funnel (TOFU/MOFU/BOFU)${ideaFunnel ? `\n- FOKUSKAN semua ide pada funnel: ${ideaFunnel}` : '\n- Distribusikan ide secara seimbang antara TOFU, MOFU, dan BOFU'}
 - Gunakan bahasa Indonesia yang natural
 - Buat total ${jumlahIde} ide
 </OUTPUT_FORMAT>`
@@ -234,12 +257,15 @@ Judul / Topik Konten: "${scriptJudul}"
 Platform: ${PLATFORMS[scriptPlatform].label}
 </TASK>
 
+${FUNNEL_PROMPT_GUIDE}
+
 <THINKING_PROCESS>
 Sebelum menulis, analisa:
 1. Format terbaik untuk topik ini di ${PLATFORMS[scriptPlatform].label}
 2. Tipe hook yang paling stopping power di platform ini
 3. Panjang optimal konten berdasarkan algoritma platform
 4. CTA yang sesuai culture platform
+5. Tentukan di funnel mana konten ini paling cocok (TOFU/MOFU/BOFU)
 </THINKING_PROCESS>
 
 <OUTPUT_FORMAT>
@@ -341,6 +367,7 @@ Daftar 5-7 poin. Contoh: "5 buku yang mengubah hidup gue"
 
 ---
 
+${angleFunnel ? `FOKUS funnel: ${angleFunnel}. Sesuaikan semua angle untuk tujuan funnel ini.` : 'Untuk setiap angle, tentukan apakah cocok untuk TOFU, MOFU, atau BOFU.'}
 Bahasa Indonesia natural. Sesuai style ${PLATFORMS[anglePlatform].label}.
 </OUTPUT_FORMAT>`
   }
@@ -374,6 +401,7 @@ Bahasa Indonesia natural. Sesuai style ${PLATFORMS[anglePlatform].label}.
         pilar: pilar,
         status: 'Idea',
         platform: ideaPlatforms[0] || 'Instagram',
+        funnel: ideaFunnel || 'TOFU',
       })
       if (error) throw error
       toast.success(`"${idea.slice(0, 40)}..." disimpan ke planner ✓`)
@@ -457,6 +485,26 @@ Bahasa Indonesia natural. Sesuai style ${PLATFORMS[anglePlatform].label}.
             <PlatformSelector selected={ideaPlatforms} onChange={setIdeaPlatforms} multi={true} />
 
             <Field id="jumlah-ide" label="Jumlah Ide" value={jumlahIde} onChange={setJumlahIde} type="number" placeholder="5" />
+
+            {/* Funnel selector */}
+            <div>
+              <label className="label-base">🔻 Funnel Konten (opsional — kosongkan untuk mix otomatis)</label>
+              <div className="flex flex-wrap gap-2 mt-1">
+                <button type="button" onClick={() => setIdeaFunnel('')}
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                  style={{ background: !ideaFunnel ? 'rgba(242,202,80,0.15)' : 'var(--bg-input)', color: !ideaFunnel ? '#f2ca50' : 'var(--text-secondary)', border: !ideaFunnel ? '1px solid rgba(242,202,80,0.4)' : '1px solid var(--border-color)' }}>
+                  🔄 Mix (TOFU+MOFU+BOFU)
+                </button>
+                {FUNNEL_OPTIONS.map(f => (
+                  <button key={f.key} type="button" onClick={() => setIdeaFunnel(f.key)}
+                    className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                    style={{ background: ideaFunnel === f.key ? `${f.color}18` : 'var(--bg-input)', color: ideaFunnel === f.key ? f.color : 'var(--text-secondary)', border: ideaFunnel === f.key ? `1px solid ${f.color}40` : '1px solid var(--border-color)' }}>
+                    {f.emoji} {f.key}
+                  </button>
+                ))}
+              </div>
+              {ideaFunnel && <p className="text-[10px] mt-1" style={{ color: 'var(--text-muted)' }}>{FUNNEL_OPTIONS.find(f => f.key === ideaFunnel)?.desc}</p>}
+            </div>
 
             <InfoBanner>
               💡 <strong>Tips Token-Efficient:</strong> Untuk {ideaPlatforms.length > 3 ? 'banyak platform, kurangi jumlah ide (3-5)' : 'sedikit platform, bisa generate lebih banyak ide (5-10)'}
